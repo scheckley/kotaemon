@@ -2,7 +2,7 @@
 FROM python:3.10-slim as base_image
 
 # Create a non-root user
-RUN groupadd -g 1001 appuser && useradd -u 1001 userapp userapp
+RUN groupadd -g 1001 appuser && useradd -u 1001 -g userapp userapp
 
 
 # Install necessary packages
