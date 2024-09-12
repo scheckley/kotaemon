@@ -2,7 +2,8 @@
 FROM python:3.10-slim as base_image
 
 # Create a non-root user
-RUN useradd -ms /bin/bash appuser
+RUN groupadd -g 1001 appuser && useradd -u 1001 userapp userapp
+
 
 # Install necessary packages
 RUN apt-get update -qqy && \
@@ -47,6 +48,9 @@ RUN bash scripts/download_pdfjs.sh $PDFJS_PREBUILT_DIR
 
 # Copy the app and install dependencies as non-root user
 COPY --chown=appuser:appuser . /app
+
+USER root
+
 RUN --mount=type=ssh pip install --no-cache-dir -e "libs/kotaemon[all]" \
     && pip install --no-cache-dir -e "libs/ktem" \
     && pip install --no-cache-dir graphrag future theflow decouple python-decouple \
