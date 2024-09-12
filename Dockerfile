@@ -8,14 +8,14 @@ RUN groupadd -g 1001 appuser && useradd -u 1001 -g appuser appuser
 # Install necessary packages
 RUN apt-get update -qqy && \
     apt-get install -y --no-install-recommends \
-      ssh \
-      git \
-      gcc \
-      g++ \
-      poppler-utils \
-      libpoppler-dev \
-      unzip \
-      curl \
+    ssh \
+    git \
+    gcc \
+    g++ \
+    poppler-utils \
+    libpoppler-dev \
+    unzip \
+    curl \
     && apt-get clean \
     && apt-get autoremove \
     && rm -rf /var/lib/apt/lists/*
@@ -54,7 +54,8 @@ USER root
 RUN --mount=type=ssh pip install --no-cache-dir -e "libs/kotaemon[all]" \
     && pip install --no-cache-dir -e "libs/ktem" \
     && pip install --no-cache-dir graphrag future theflow python-decouple \
-    && pip install --no-cache-dir "pdfservices-sdk@git+https://github.com/niallcm/pdfservices-python-sdk.git@bump-and-unfreeze-requirements"
+    && pip install --no-cache-dir "pdfservices-sdk@git+https://github.com/niallcm/pdfservices-python-sdk.git@bump-and-unfreeze-requirements" \
+    && pip uninstall decouple
 
 # Specify the user to run the container
 USER appuser
