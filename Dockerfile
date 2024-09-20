@@ -37,8 +37,7 @@ FROM base_image as dev
 COPY scripts/download_pdfjs.sh /app/scripts/download_pdfjs.sh
 RUN chmod +x /app/scripts/download_pdfjs.sh
 
-# Switch to the non-root user
-USER appuser
+USER root
 
 # Set PDFJS directory
 ENV PDFJS_PREBUILT_DIR="/app/libs/ktem/ktem/assets/prebuilt/pdfjs-dist"
@@ -46,7 +45,6 @@ ENV PDFJS_PREBUILT_DIR="/app/libs/ktem/ktem/assets/prebuilt/pdfjs-dist"
 # Run the script as a non-root user
 RUN bash scripts/download_pdfjs.sh $PDFJS_PREBUILT_DIR
 
-USER root
 # Copy the app and install dependencies as non-root user
 COPY --chown=appuser:appuser . /app
 
