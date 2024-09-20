@@ -2,7 +2,9 @@
 FROM python:3.10-slim as base_image
 
 # Create a non-root user
-RUN groupadd -g 1001 appuser && useradd -u 1001 -g appuser appuser
+
+# commented out for OpenShift which will randomly allocate a name
+#RUN groupadd -g 1001 appuser && useradd -u 1001 -g appuser appuser
 
 
 # Install necessary packages
@@ -28,8 +30,8 @@ ENV PYTHONIOENCODING=UTF-8
 # Set working directory
 WORKDIR /app
 
-# Change ownership of the working directory
-RUN chown -R appuser:appuser /app
+# make /app accessible by all userrs
+RUN chmod -R 775 /app
 
 FROM base_image as dev
 
@@ -37,7 +39,6 @@ FROM base_image as dev
 COPY scripts/download_pdfjs.sh /app/scripts/download_pdfjs.sh
 RUN chmod +x /app/scripts/download_pdfjs.sh
 
-USER root
 
 # Set PDFJS directory
 ENV PDFJS_PREBUILT_DIR="/app/libs/ktem/ktem/assets/prebuilt/pdfjs-dist"
@@ -54,7 +55,11 @@ RUN --mount=type=ssh pip install --no-cache-dir -e "libs/kotaemon[all]" \
     && pip install --no-cache-dir "pdfservices-sdk@git+https://github.com/niallcm/pdfservices-python-sdk.git@bump-and-unfreeze-requirements" \
     && pip uninstall decouple
 
-# Specify the user to run the container
-USER appuser
+
+# Ensure the application is accessible by any user
+RUN chmod -R 775 /app
+
+# Let OpenShift automatically assign a random user
+USER 1001
 
 CMD ["python", "app.py"]
