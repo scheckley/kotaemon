@@ -55,7 +55,11 @@ RUN --mount=type=ssh pip install --no-cache-dir -e "libs/kotaemon[all]" \
 # Ensure the application is accessible by any user
 RUN chmod -R 775 /app
 
+# Expose the apps default port
+EXPOSE 7860
+
 # Let OpenShift automatically assign a random user
 USER 1001
 
-CMD ["python", "app.py"]
+# Make sure the application binds to 0.0.0.0 instead of 127.0.0.1
+CMD ["python", "app.py", "--host", "0.0.0.0", "--port", "7860"]
