@@ -49,12 +49,11 @@ RUN bash scripts/download_pdfjs.sh $PDFJS_PREBUILT_DIR
 # Copy the app and install dependencies
 COPY . /app
 
-RUN --mount=type=ssh pip install --no-cache-dir -e "libs/kotaemon[all]" \
-    && pip install --no-cache-dir -e "libs/ktem" \
-    && pip install --no-cache-dir graphrag future theflow python-decouple \
-    && pip install --no-cache-dir "pdfservices-sdk@git+https://github.com/niallcm/pdfservices-python-sdk.git@bump-and-unfreeze-requirements" \
-    && pip uninstall decouple
-
+RUN pip install --user --no-cache-dir -e "libs/kotaemon[all]" \
+    && pip install --user --no-cache-dir -e "libs/ktem" \
+    && pip install --user --no-cache-dir graphrag future theflow python-decouple \
+    && pip install --user --no-cache-dir "pdfservices-sdk@git+https://github.com/niallcm/pdfservices-python-sdk.git@bump-and-unfreeze-requirements" \
+    && pip uninstall --user decouple
 
 # Ensure the application is accessible by any user
 RUN chmod -R 775 /app
