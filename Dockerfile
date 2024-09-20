@@ -1,12 +1,6 @@
 # syntax=docker/dockerfile:1.0.0-experimental
 FROM python:3.10-slim as base_image
 
-# Create a non-root user
-
-# commented out for OpenShift which will randomly allocate a name
-#RUN groupadd -g 1001 appuser && useradd -u 1001 -g appuser appuser
-
-
 # Install necessary packages
 RUN apt-get update -qqy && \
     apt-get install -y --no-install-recommends \
@@ -30,8 +24,12 @@ ENV PYTHONIOENCODING=UTF-8
 # Set working directory
 WORKDIR /app
 
-# make /app accessible by all userrs
+# Ensure the directory is accessible by any user
 RUN chmod -R 775 /app
+
+# Set up NLTK data directory for cache
+ENV NLTK_DATA=/app/nltk_data
+RUN mkdir -p /app/nltk_data && chmod -R 775 /app/nltk_data
 
 FROM base_image as dev
 
@@ -39,21 +37,20 @@ FROM base_image as dev
 COPY scripts/download_pdfjs.sh /app/scripts/download_pdfjs.sh
 RUN chmod +x /app/scripts/download_pdfjs.sh
 
-
 # Set PDFJS directory
 ENV PDFJS_PREBUILT_DIR="/app/libs/ktem/ktem/assets/prebuilt/pdfjs-dist"
 
-# Run the script as a non-root user
+# Run the script
 RUN bash scripts/download_pdfjs.sh $PDFJS_PREBUILT_DIR
 
 # Copy the app and install dependencies
 COPY . /app
 
-RUN pip install --user --no-cache-dir -e "libs/kotaemon[all]" \
-    && pip install --user --no-cache-dir -e "libs/ktem" \
-    && pip install --user --no-cache-dir graphrag future theflow python-decouple \
-    && pip install --user --no-cache-dir "pdfservices-sdk@git+https://github.com/niallcm/pdfservices-python-sdk.git@bump-and-unfreeze-requirements" \
-    && pip uninstall --user decouple
+RUN --mount=type=ssh pip install --no-cache-dir -e "libs/kotaemon[all]" \
+    && pip install --no-cache-dir -e "libs/ktem" \
+    && pip install --no-cache-dir graphrag future theflow python-decouple \
+    && pip install --no-cache-dir "pdfservices-sdk@git+https://github.com/niallcm/pdfservices-python-sdk.git@bump-and-unfreeze-requirements" \
+    && pip uninstall decouple
 
 # Ensure the application is accessible by any user
 RUN chmod -R 775 /app
