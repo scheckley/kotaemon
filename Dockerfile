@@ -46,8 +46,8 @@ ENV PDFJS_PREBUILT_DIR="/app/libs/ktem/ktem/assets/prebuilt/pdfjs-dist"
 # Run the script as a non-root user
 RUN bash scripts/download_pdfjs.sh $PDFJS_PREBUILT_DIR
 
-# Copy the app and install dependencies as non-root user
-COPY --chown=appuser:appuser . /app
+# Copy the app and install dependencies
+COPY . /app
 
 RUN --mount=type=ssh pip install --no-cache-dir -e "libs/kotaemon[all]" \
     && pip install --no-cache-dir -e "libs/ktem" \
