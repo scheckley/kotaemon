@@ -32,6 +32,8 @@ ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 ENV PYTHONIOENCODING=UTF-8
 ENV TARGETARCH=${TARGETARCH}
+# Add local bin to PATH for user-installed scripts
+ENV PATH="/home/${USERNAME}/.local/bin:${PATH}"
 
 # Create working directory with correct permissions
 WORKDIR /app
