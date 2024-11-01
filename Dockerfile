@@ -54,7 +54,7 @@ COPY --chown=${USERNAME}:${USERNAME} .env.example /app/.env
 
 # Install pip packages without mounts
 RUN pip install --user --no-cache-dir -e "libs/kotaemon" && \
-    pip install --user --no-cache-dir future python-decouple && \
+    pip install --user --no-cache-dir future theflow python-decouple && \
     pip install --user --no-cache-dir -e "libs/ktem" && \
     pip install --user --no-cache-dir "pdfservices-sdk@git+https://github.com/niallcm/pdfservices-python-sdk.git@bump-and-unfreeze-requirements"
 
