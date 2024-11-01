@@ -60,7 +60,7 @@ RUN pip install --user --no-cache-dir -e "libs/kotaemon" && \
 
 # Install architecture-specific packages
 RUN if [ "$TARGETARCH" = "amd64" ]; then \
-    pip install --user --no-cache-dir graphrag future; \
+    pip install --user --no-cache-dir graphrag future theflow python-decouple ; \
     fi
 
 CMD ["python", "app.py"]
@@ -90,7 +90,7 @@ RUN pip install --user --no-cache-dir torch torchvision torchaudio --index-url h
 
 # Install additional pip packages without mounts
 RUN pip install --user --no-cache-dir -e "libs/kotaemon[adv]" && \
-     pip install --user --no-cache-dir future theflow python-decouple && \
+    pip install --user --no-cache-dir future theflow python-decouple && \
     pip install --user --no-cache-dir unstructured[all-docs]
 
 # Download NLTK packages explicitly
