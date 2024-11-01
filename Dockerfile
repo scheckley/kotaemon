@@ -39,6 +39,8 @@ ENV PATH="/home/${USERNAME}/.local/bin:${PATH}"
 WORKDIR /app
 RUN chown -R ${USERNAME}:${USERNAME} /app
 
+RUN chmod -R 755 /app
+
 # Switch to non-root user
 USER ${USERNAME}
 
