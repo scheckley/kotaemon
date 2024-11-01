@@ -52,6 +52,10 @@ RUN bash scripts/download_pdfjs.sh $PDFJS_PREBUILT_DIR
 COPY --chown=${USERNAME}:${USERNAME} . /app
 COPY --chown=${USERNAME}:${USERNAME} .env.example /app/.env
 
+# Set up NLTK data directory for cache
+ENV NLTK_DATA=/app/nltk_data
+RUN mkdir -p /app/nltk_data && chmod -R 775 /app/nltk_data
+
 # Install pip packages
 RUN --mount=type=ssh \
     --mount=type=cache,target=/home/${USERNAME}/.cache/pip \
@@ -97,6 +101,7 @@ RUN --mount=type=ssh \
     && pip install --user unstructured[all-docs]
 
 # Download nltk packages as required for unstructured
+RUN python -c "import nltk; nltk.download('punkt'); nltk.download('averaged_perceptron_tagger')"
 RUN python -c "from unstructured.nlp.tokenize import download_nltk_packages_if_not_present; download_nltk_packages_if_not_present()"
 
 CMD ["python", "app.py"]
