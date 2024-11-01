@@ -65,7 +65,8 @@ RUN if [ "$TARGETARCH" = "amd64" ]; then \
     pip install --user --no-cache-dir graphrag future theflow python-decouple ; \
     fi
 
-CMD ["python", "app.py"]
+CMD ["python3", "app.py", --"host", "0.0.0.0", "--port", "7860"]
+
 
 # Full version
 FROM lite AS full
@@ -106,4 +107,4 @@ EXPOSE 7860
 
 USER 1001
 
-CMD ["python", "app.py", --"host", "0.0.0.0", "--port", "7860"]
+CMD ["python3", "app.py", --"host", "0.0.0.0", "--port", "7860"]
