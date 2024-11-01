@@ -65,7 +65,7 @@ RUN if [ "$TARGETARCH" = "amd64" ]; then \
     pip install --user --no-cache-dir graphrag future theflow python-decouple ; \
     fi
 
-CMD ["python3", "app.py", "--host", "0.0.0.0", "--port", "7860"]
+CMD ["python", "app.py", "--host", "0.0.0.0", "--port", "7860"]
 
 
 # Full version
@@ -97,7 +97,7 @@ RUN pip install --user --no-cache-dir -e "libs/kotaemon[adv]" && \
     pip install --user --no-cache-dir unstructured[all-docs]
 
 # Download NLTK packages explicitly
-RUN pip install --user --no-cache-dir nltk && \
+RUN pip install --user --no-cache-dir graphrag future nltk theflow python-decouple && \
     python -c "import nltk; nltk.download('punkt', download_dir=nltk.data.path[0]); nltk.download('averaged_perceptron_tagger', download_dir=nltk.data.path[0])"
 
 
@@ -107,4 +107,4 @@ EXPOSE 7860
 
 USER 1001
 
-CMD ["python3", "app.py", "--host", "0.0.0.0", "--port", "7860"]
+CMD ["python", "app.py", "--host", "0.0.0.0", "--port", "7860"]
