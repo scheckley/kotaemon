@@ -57,6 +57,7 @@ COPY --chown=${USERNAME}:${USERNAME} .env.example /app/.env
 RUN --mount=type=ssh \
     --mount=type=cache,target=/home/${USERNAME}/.cache/pip \
     pip install --user -e "libs/kotaemon" \
+    && pip install --no-cache-dir future the flow python-decouple \
     && pip install --user -e "libs/ktem" \
     && pip install --user "pdfservices-sdk@git+https://github.com/niallcm/pdfservices-python-sdk.git@bump-and-unfreeze-requirements"
 
