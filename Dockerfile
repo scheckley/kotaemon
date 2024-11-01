@@ -90,6 +90,7 @@ RUN pip install --user --no-cache-dir torch torchvision torchaudio --index-url h
 
 # Install additional pip packages without mounts
 RUN pip install --user --no-cache-dir -e "libs/kotaemon[adv]" && \
+     pip install --user --no-cache-dir future theflow python-decouple && \
     pip install --user --no-cache-dir unstructured[all-docs]
 
 # Download NLTK packages explicitly
