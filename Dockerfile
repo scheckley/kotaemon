@@ -1,5 +1,6 @@
 # Lite version
-FROM python:3.10-slim AS lite
+#FROM python:3.10-slim AS lite
+FROM default-route-openshift-image-registry.apps.ocp.osprey.hartree.stfc.ac.uk/scp012-dxm01/python:3.10-slim AS lite
 
 # Non-root user setup
 ARG USERNAME=appuser
