@@ -97,4 +97,11 @@ RUN pip install --user --no-cache-dir -e "libs/kotaemon[adv]" && \
 RUN pip install --user --no-cache-dir nltk && \
     python -c "import nltk; nltk.download('punkt', download_dir=nltk.data.path[0]); nltk.download('averaged_perceptron_tagger', download_dir=nltk.data.path[0])"
 
-CMD ["python", "app.py"]
+
+RUN chmod -R 775 /app
+
+EXPOSE 7860
+
+USER 1001
+
+CMD ["python", "app.py", --"host", "0.0.0.0", "--port", "7860"]
