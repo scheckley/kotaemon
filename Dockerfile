@@ -10,6 +10,10 @@ ARG USER_GID=${USER_UID}
 RUN groupadd --gid ${USER_GID} ${USERNAME} \
     && useradd --uid ${USER_UID} --gid ${USER_GID} -m ${USERNAME}
 
+# Set HOME and PATH for user
+ENV HOME=/home/${USERNAME} \
+    PATH=/home/${USERNAME}/.local/bin:$PATH
+
 # Common dependencies with non-root considerations
 RUN apt-get update -qqy && \
     apt-get install -y --no-install-recommends \
