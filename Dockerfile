@@ -14,6 +14,9 @@ RUN groupadd --gid ${USER_GID} ${USERNAME} \
 ENV HOME=/home/${USERNAME} \
     PATH=/home/${USERNAME}/.local/bin:$PATH
 
+# set Python path
+ENV PYTHONPATH="/app"
+
 # Common dependencies with non-root considerations
 RUN apt-get update -qqy && \
     apt-get install -y --no-install-recommends \
