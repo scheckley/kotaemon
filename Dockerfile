@@ -1,99 +1,123 @@
 # Lite version
-FROM python:3.10-slim AS lite
+FROM nvidia/cuda:12.4.0-base-ubuntu22.04 AS lite
 
-# Common dependencies
-RUN apt-get update -qqy && \
-    apt-get install -y --no-install-recommends \
-      ssh \
-      git \
-      gcc \
-      g++ \
-      poppler-utils \
-      libpoppler-dev \
-      unzip \
-      curl \
-      cargo
+# Set up environment variables
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PYTHONIOENCODING=UTF-8 \
+    PDFJS_PREBUILT_DIR="/tmp/build/app/libs/ktem/ktem/assets/prebuilt/pdfjs-dist" \
+    NLTK_DATA="/tmp/build/app/nltk_data" \
+    MPLCONFIGDIR="/tmp/build/app/matplotlib" \
+    XDG_CACHE_HOME="/tmp/build/app/fontconfig" \
+    HOME="/tmp/build" \
+    PATH="/tmp/build/.local/bin:$PATH"
 
-# Setup args
+# Set up ARGs
 ARG TARGETPLATFORM
 ARG TARGETARCH
 
-# Set environment variables
-ENV PYTHONDONTWRITEBYTECODE=1
-ENV PYTHONUNBUFFERED=1
-ENV PYTHONIOENCODING=UTF-8
-ENV TARGETARCH=${TARGETARCH}
+# Use a multi-stage build to install system dependencies
+FROM lite AS builder
 
-# Create working directory
-WORKDIR /app
+USER root
+RUN apt update -qqy && \
+    apt install -y --no-install-recommends \
+    python3.10 \
+    python3-pip \
+    python3.10-venv \
+    python3-dev \
+    ssh \
+    git \
+    gcc \
+    g++ \
+    poppler-utils \
+    libpoppler-dev \
+    unzip \
+    curl \
+    cargo \
+    tesseract-ocr \
+    tesseract-ocr-jpn \
+    libsm6 \
+    libxext6 \
+    libreoffice \
+    ffmpeg \
+    libmagic-dev \
+    nvidia-container-toolkit \
+    nvidia-cuda-toolkit && \
+    rm -rf /var/lib/apt/lists/* && \
+    ln -s /usr/bin/python3 /usr/bin/python
+
+# Create required directories with appropriate permissions
+RUN mkdir -p /tmp/build/app/libs \
+    /tmp/build/app/scripts \
+    /tmp/build/app/nltk_data \
+    /tmp/build/app/matplotlib \
+    /tmp/build/app/fontconfig \
+    /tmp/build/.local/bin \
+    /tmp/build/.cache/pip && \
+    chmod -R g+rwX /tmp/build && \
+    chown -R 1001:0 /tmp/build
+
+FROM builder AS dependencies
+
+USER 1001:0
+WORKDIR /tmp/build/app
+
+# Upgrade pip
+RUN python -m pip install --user --upgrade pip
 
 # Download pdfjs
-COPY scripts/download_pdfjs.sh /app/scripts/download_pdfjs.sh
-RUN chmod +x /app/scripts/download_pdfjs.sh
-ENV PDFJS_PREBUILT_DIR="/app/libs/ktem/ktem/assets/prebuilt/pdfjs-dist"
-RUN bash scripts/download_pdfjs.sh $PDFJS_PREBUILT_DIR
+COPY --chown=1001:0 scripts/download_pdfjs.sh /tmp/build/app/scripts/download_pdfjs.sh
+RUN bash /tmp/build/app/scripts/download_pdfjs.sh $PDFJS_PREBUILT_DIR
 
-# Copy contents
-COPY . /app
-COPY .env.example /app/.env
+# Copy application files
+COPY --chown=1001:0 . /tmp/build/app
+COPY --chown=1001:0 .env.example /tmp/build/app/.env
 
-# Install pip packages
-RUN --mount=type=ssh  \
-    --mount=type=cache,target=/root/.cache/pip  \
-    pip install -e "libs/kotaemon" \
-    && pip install -e "libs/ktem" \
-    && pip install "pdfservices-sdk@git+https://github.com/niallcm/pdfservices-python-sdk.git@bump-and-unfreeze-requirements"
+# Install Python packages
+RUN python -m pip install --user -e "libs/kotaemon[adv]" && \
+    python -m pip install --user -e "libs/ktem" && \
+    python -m pip install --user "pdfservices-sdk@git+https://github.com/niallcm/pdfservices-python-sdk.git@bump-and-unfreeze-requirements"
 
-RUN --mount=type=ssh  \
-    --mount=type=cache,target=/root/.cache/pip  \
-    if [ "$TARGETARCH" = "amd64" ]; then pip install "graphrag<=0.3.6" future; fi
+# Conditional installation based on architecture
+RUN if [ "$TARGETARCH" = "amd64" ]; then \
+    python -m pip install --user "graphrag<=0.3.6" future; \
+    fi
 
-# Clean up
-RUN apt-get autoremove \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/* \
-    && rm -rf ~/.cache
+# Final stage
+FROM dependencies AS lite-final
 
-CMD ["python", "app.py"]
+USER 1001:0
+WORKDIR /tmp/build/app
+
+CMD ["python", "app.py", "--host", "0.0.0.0", "--port", "7860"]
 
 # Full version
-FROM lite AS full
+FROM lite-final AS full
 
-# Additional dependencies for full version
-RUN apt-get update -qqy && \
-    apt-get install -y --no-install-recommends \
-      tesseract-ocr \
-      tesseract-ocr-jpn \
-      libsm6 \
-      libxext6 \
-      libreoffice \
-      ffmpeg \
-      libmagic-dev
+USER 1001:0
 
-# Install torch and torchvision for unstructured
-RUN --mount=type=ssh  \
-    --mount=type=cache,target=/root/.cache/pip  \
-    pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
+# Install torch and related packages
+RUN python -m pip install --user torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
 
 # Install additional pip packages
-RUN --mount=type=ssh  \
-    --mount=type=cache,target=/root/.cache/pip  \
-    pip install -e "libs/kotaemon[adv]" \
-    && pip install unstructured[all-docs]
+RUN python -m pip install --user -e "libs/kotaemon[adv]" && \
+    python -m pip install --user unstructured[all-docs] && \
+    python -m pip install --user nltk
+
+# Graphrag fix
+RUN python -m pip uninstall --yes hnswlib chroma-hnswlib && \
+    python -m pip install --user chroma-hnswlib==0.7.1 && \
+    python -m pip install --user nano-graphrag && \
+    pip install git+https://github.com/HKUDS/LightRAG.git
 
 # Install lightRAG
 ENV USE_LIGHTRAG=true
-RUN --mount=type=ssh  \
-    --mount=type=cache,target=/root/.cache/pip  \
-    pip install aioboto3 nano-vectordb ollama xxhash lightrag-hku
+ENV USE_NANO_GRAPHRAG=true
+RUN python -m pip install --user aioboto3 nano-vectordb ollama xxhash lightrag-hku
 
-# Clean up
-RUN apt-get autoremove \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/* \
-    && rm -rf ~/.cache
+RUN python -c "import nltk; nltk.download('punkt', download_dir='/tmp/build/app/nltk_data'); nltk.download('averaged_perceptron_tagger', download_dir='/tmp/build/app/nltk_data')"
 
-# Download nltk packages as required for unstructured
-RUN python -c "from unstructured.nlp.tokenize import _download_nltk_packages_if_not_present; _download_nltk_packages_if_not_present()"
+RUN pip uninstall --yes hnswlib chroma-hnswlib && pip install chroma-hnswlib
 
-CMD ["python", "app.py"]
+CMD ["python", "app.py", "--host", "0.0.0.0", "--port", "7860"]

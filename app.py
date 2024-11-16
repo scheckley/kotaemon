@@ -21,4 +21,5 @@ demo.queue().launch(
         "libs/ktem/ktem/assets",
         GRADIO_TEMP_DIR,
     ],
+    server_name="0.0.0.0",
 )
