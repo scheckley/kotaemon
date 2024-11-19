@@ -114,7 +114,15 @@ RUN python -m pip uninstall --yes hnswlib chroma-hnswlib && \
 # Install lightRAG
 ENV USE_LIGHTRAG=true
 ENV USE_NANO_GRAPHRAG=true
+
 RUN python -m pip install --user aioboto3 nano-vectordb ollama xxhash lightrag-hku
+RUN --mount=type=ssh  \
+    --mount=type=cache,target=/root/.cache/pip  \
+    pip install aioboto3 nano-vectordb ollama xxhash "lightrag-hku<=0.0.8"
+
+RUN --mount=type=ssh  \
+    --mount=type=cache,target=/root/.cache/pip  \
+    pip install "docling<=2.5.2"
 
 RUN python -c "import nltk; nltk.download('punkt', download_dir='/tmp/build/app/nltk_data'); nltk.download('averaged_perceptron_tagger', download_dir='/tmp/build/app/nltk_data')"
 
