@@ -1,6 +1,6 @@
 # Lite version
 #FROM nvidia/cuda:12.4.0-base-ubuntu22.04 AS lite
-FROM python:3.10-slim AS lite
+FROM python:3.10-bullseye AS lite
 
 # Set up environment variables
 ENV PYTHONDONTWRITEBYTECODE=1 \
@@ -20,12 +20,11 @@ ARG TARGETARCH
 # Use a multi-stage build to install system dependencies
 FROM lite AS builder
 
-USER root
-RUN apt update -qqy && \
+# Add backports repository for missing packages
+RUN echo "deb http://deb.debian.org/debian bullseye-backports main" > /etc/apt/sources.list.d/backports.list && \
+    apt update -qqy && \
     apt install -y --no-install-recommends \
-    python3.10 \
-    python3-pip \
-    python3.10-venv \
+    python3-venv \
     python3-dev \
     ssh \
     git \
@@ -43,11 +42,14 @@ RUN apt update -qqy && \
     libxext6 \
     libreoffice \
     ffmpeg \
-    libmagic-dev \
-    nvidia-container-toolkit \
-    nvidia-cuda-toolkit && \
-    rm -rf /var/lib/apt/lists/* && \
-    ln -s /usr/bin/python3 /usr/bin/python
+    libmagic-dev && \
+    #nvidia-container-toolkit \
+    #nvidia-cuda-toolkit && \
+    rm -rf /var/lib/apt/lists/*
+
+# Link python3 to python
+RUN ln -s /usr/bin/python3 /usr/bin/python
+
 
 # Create required directories with appropriate permissions
 RUN mkdir -p /tmp/build/app/libs \
