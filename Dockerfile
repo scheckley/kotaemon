@@ -49,8 +49,7 @@ RUN apt update -qqy && \
     ln -s /usr/bin/python3 /usr/bin/python
 
 # Create required directories with appropriate permissions
-RUN mkdir -p /tmp/build/app/ktem_app_data \
-    /tmp/build/app/libs \
+RUN mkdir -p /tmp/build/app/libs \
     /tmp/build/app/scripts \
     /tmp/build/app/nltk_data \
     /tmp/build/app/matplotlib \
@@ -58,10 +57,14 @@ RUN mkdir -p /tmp/build/app/ktem_app_data \
     /tmp/build/.local/bin \
     /tmp/build/.cache/pip && \
     chmod -R g+rwX /tmp/build && \
-    chown -R 1001:0 /tmp/build && \
+    mkdir -p /storage/ktem_app_data && \
+    mkdir -p /tmp/build/app/ktem_app_data && \
+    if [ ! -d "/storage/ktem_app_data/initialized" ]; then \
+        cp -R /tmp/build/app/ktem_app_data_deployment/* /storage/ktem_app_data/ && \
+        touch /storage/ktem_app_data/initialized; \
+    fi && \
     ln -sf /storage/ktem_app_data /tmp/build/app/ktem_app_data && \
-    chown -h 1001:0 /tmp/build/app/ktem_app_data && \
-    chmod 755 /tmp/build/app/ktem_app_data
+    chmod -R 775 /storage/ktem_app_data
     
 FROM builder AS dependencies
 
