@@ -64,7 +64,9 @@ FROM builder AS dependencies
 
 USER 1001:0
 WORKDIR /tmp/build/app
-RUN ln -s /storage/ktem_app_data /tmp/build/app/ktem_app_data
+
+RUN ln -s /storage/ktem_app_data /tmp/build/app/ktem_app_data && \
+    chown -h 1001:0 /tmp/build/app/ktem_app_data
 
 # Upgrade pip
 RUN python -m pip install --user --upgrade pip
