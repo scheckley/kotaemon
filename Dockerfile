@@ -1,5 +1,6 @@
 # Lite version
-FROM nvidia/cuda:12.4.0-base-ubuntu22.04 AS lite
+#FROM nvidia/cuda:12.4.0-base-ubuntu22.04 AS lite
+FROM python:3.10-slim AS lite
 
 # Set up environment variables
 ENV PYTHONDONTWRITEBYTECODE=1 \
@@ -57,14 +58,8 @@ RUN mkdir -p /tmp/build/app/libs \
     /tmp/build/.local/bin \
     /tmp/build/.cache/pip && \
     chmod -R g+rwX /tmp/build && \
-    mkdir -p /storage/ktem_app_data && \
-    mkdir -p /tmp/build/app/ktem_app_data && \
-    if [ ! -d "/storage/ktem_app_data/initialized" ]; then \
-        cp -R /tmp/build/app/ktem_app_data_deployment/* /storage/ktem_app_data/ && \
-        touch /storage/ktem_app_data/initialized; \
-    fi && \
-    ln -sf /storage/ktem_app_data /tmp/build/app/ktem_app_data && \
-    chmod -R 775 /storage/ktem_app_data
+    chown -R 1001:0 /tmp/build
+
     
 FROM builder AS dependencies
 
