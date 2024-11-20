@@ -55,8 +55,9 @@ RUN mkdir -p /tmp/build/app/libs \
     /tmp/build/app/fontconfig \
     /tmp/build/.local/bin \
     /tmp/build/.cache/pip && \
-    chmod -R g+rwX /tmp/build && \
-    chown -R 1001:0 /tmp/build
+    mkdir -p /storage/ktem_app_data && \
+    chmod -R g+rwX /tmp/build /storage && \
+    chown -R 1001:0 /tmp/build /storage
 
 FROM builder AS dependencies
 
@@ -87,6 +88,13 @@ RUN chmod +x /tmp/build/app/scripts/download_pdfjs.sh && \
 COPY --chown=1001:0 . /tmp/build/app
 COPY --chown=1001:0 .env.example /tmp/build/app/.env
 
+# Debug and handle ktem_app_data
+RUN echo "Contents of /tmp/build/app before handling ktem_app_data:" && ls -la /tmp/build/app && \
+    rm -rf /tmp/build/app/ktem_app_data || true && \
+    mkdir -p /storage/ktem_app_data && \
+    ln -sfn /storage/ktem_app_data /tmp/build/app/ktem_app_data && \
+    echo "Contents of /tmp/build/app after handling ktem_app_data:" && ls -la /tmp/build/app
+
 # Install Python packages
 RUN python -m pip install --user -e "libs/kotaemon[adv]" && \
     python -m pip install --user -e "libs/ktem" && \
@@ -96,13 +104,6 @@ RUN python -m pip install --user -e "libs/kotaemon[adv]" && \
 RUN if [ "$TARGETARCH" = "amd64" ]; then \
     python -m pip install --user "graphrag<=0.3.6" future; \
     fi
-
-# Prepare for ktem_app_data persistence
-RUN if [ -d "/tmp/build/app/ktem_app_data" ]; then \
-        cp -r /tmp/build/app/ktem_app_data/* /storage/ktem_app_data/ 2>/dev/null || true; \
-    fi && \
-    rm -rf /tmp/build/app/ktem_app_data && \
-    ln -s /storage/ktem_app_data /tmp/build/app/ktem_app_data
 
 # Final stage
 FROM dependencies AS lite-final
