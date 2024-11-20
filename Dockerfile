@@ -1,6 +1,6 @@
 # Lite version
 #FROM nvidia/cuda:12.4.0-base-ubuntu22.04 AS lite
-FROM python:3.10-bullseye AS lite
+FROM python:3.10-slim AS lite
 
 # Set up environment variables
 ENV PYTHONDONTWRITEBYTECODE=1 \
@@ -21,8 +21,7 @@ ARG TARGETARCH
 FROM lite AS builder
 
 # Add backports repository for missing packages
-RUN echo "deb http://deb.debian.org/debian bullseye-backports main" > /etc/apt/sources.list.d/backports.list && \
-    apt update -qqy && \
+RUN apt update -qqy && \
     apt install -y --no-install-recommends \
     python3-venv \
     python3-dev \
