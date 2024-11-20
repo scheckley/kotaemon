@@ -78,7 +78,6 @@ RUN mkdir -p $PDFJS_PREBUILT_DIR && \
 # Download pdfjs using a more robust method
 COPY --chown=1001:0 scripts/download_pdfjs.sh /tmp/build/app/scripts/download_pdfjs.sh
 RUN chmod +x /tmp/build/app/scripts/download_pdfjs.sh && \
-    # Fallback method if script fails
     bash /tmp/build/app/scripts/download_pdfjs.sh $PDFJS_PREBUILT_DIR || \
     (wget https://github.com/mozilla/pdf.js/releases/download/v4.0.379/pdfjs-4.0.379-dist.zip -O $PDFJS_PREBUILT_DIR/downloaded.zip && \
      unzip $PDFJS_PREBUILT_DIR/downloaded.zip -d $PDFJS_PREBUILT_DIR && \
@@ -99,8 +98,7 @@ RUN if [ "$TARGETARCH" = "amd64" ]; then \
     fi
 
 # Prepare for ktem_app_data persistence
-RUN mkdir -p /storage/ktem_app_data && \
-    if [ -d "/tmp/build/app/ktem_app_data" ]; then \
+RUN if [ -d "/tmp/build/app/ktem_app_data" ]; then \
         cp -r /tmp/build/app/ktem_app_data/* /storage/ktem_app_data/ 2>/dev/null || true; \
     fi && \
     rm -rf /tmp/build/app/ktem_app_data && \
@@ -127,6 +125,27 @@ RUN python -m pip install --user -e "libs/kotaemon[adv]" && \
     python -m pip install --user unstructured[all-docs] && \
     python -m pip install --user nltk
 
-# Rest of the Dockerfile remains the same...
+# Graphrag fix
+RUN python -m pip uninstall --yes hnswlib chroma-hnswlib && \
+    python -m pip install --user chroma-hnswlib==0.7.1 && \
+    python -m pip install --user nano-graphrag && \
+    pip install git+https://github.com/HKUDS/LightRAG.git
+
+# Graphrag and LightRAG related env
+ENV USE_LIGHTRAG=true
+ENV USE_NANO_GRAPHRAG=true
+
+RUN python -m pip install --user aioboto3 nano-vectordb ollama xxhash lightrag-hku
+RUN --mount=type=ssh  \
+    --mount=type=cache,target=/root/.cache/pip  \
+    pip install aioboto3 nano-vectordb ollama xxhash "lightrag-hku<=0.0.8"
+
+RUN --mount=type=ssh  \
+    --mount=type=cache,target=/root/.cache/pip  \
+    pip install "docling<=2.5.2"
+
+RUN python -c "import nltk; nltk.download('punkt', download_dir='/tmp/build/app/nltk_data'); nltk.download('averaged_perceptron_tagger', download_dir='/tmp/build/app/nltk_data')"
+
+RUN pip uninstall --yes hnswlib chroma-hnswlib && pip install chroma-hnswlib
 
 CMD ["python", "app.py", "--host", "0.0.0.0", "--port", "7860"]
