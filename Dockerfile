@@ -115,12 +115,6 @@ RUN --mount=type=ssh  \
     --mount=type=cache,target=/root/.cache/pip  \
     pip install "docling<=2.5.2"
 
-# Clean up
-RUN apt-get autoremove \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/* \
-    && rm -rf ~/.cache
-
 # Final stage
 FROM dependencies AS lite-final
 
