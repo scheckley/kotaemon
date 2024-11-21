@@ -58,7 +58,7 @@ RUN mkdir -p /tmp/build/app/libs \
     /storage/ktem_app_data && \
     chmod -R 775 /tmp/build /storage && \
     chgrp -R 0 /tmp/build /storage && \
-    chown -R g=u /tmp/build /storage && \
+    chmod -R g=u /tmp/build /storage && \
     ln -s /storage/ktem_app_data /tmp/build/app/ktem_app_data
 
 FROM builder AS dependencies
