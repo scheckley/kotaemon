@@ -19,7 +19,7 @@ ARG TARGETARCH
 # Use a multi-stage build to install system dependencies
 FROM lite AS builder
 
-# Add backports repository for missing packages
+# Common dependencies
 RUN apt update -qqy && \
     apt install -y --no-install-recommends \
     python3-venv \
@@ -73,19 +73,14 @@ RUN mkdir -p $PDFJS_PREBUILT_DIR && \
     chmod -R g+rwX $PDFJS_PREBUILT_DIR && \
     chown -R 1001:0 $PDFJS_PREBUILT_DIR
 
+# Download pdfjs
+COPY scripts/download_pdfjs.sh /app/scripts/download_pdfjs.sh
+RUN chmod +x /app/scripts/download_pdfjs.sh
+RUN bash scripts/download_pdfjs.sh $PDFJS_PREBUILT_DIR
+
 # Copy application files
 COPY --chown=1001:0 . /tmp/build/app
 COPY --chown=1001:0 .env.example /tmp/build/app/.env
-
-# Ensure ktem_app_data symlink with minimal intervention
-# for now, this is pushed up to the above section and app.py checks it at run time.
-#RUN mkdir -p /storage/ktem_app_data && \
-#    ln -sfn /storage/ktem_app_data /tmp/build/app/ktem_app_data
-
-# Install torch and torchvision for unstructured
-RUN --mount=type=ssh  \
-    --mount=type=cache,target=/root/.cache/pip  \
-    pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
 
 # Python package installations
 RUN python -m pip install --user -e "libs/kotaemon[adv]" && \
@@ -95,8 +90,11 @@ RUN python -m pip install --user -e "libs/kotaemon[adv]" && \
 
 # Conditional installation based on architecture
 RUN if [ "$TARGETARCH" = "amd64" ]; then \
-    python -m pip install --user "graphrag<=0.3.6" future; \
+    python -m pip install --user -e "graphrag<=0.3.6" future; \
     fi
+
+# Install torch and torchvision for unstructured
+RUN python -m pip install --user -e torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
 
 # Graphrag fix
 RUN python -m pip uninstall --yes hnswlib chroma-hnswlib && \
@@ -106,14 +104,11 @@ RUN python -m pip uninstall --yes hnswlib chroma-hnswlib && \
 
 # Install lightRAG
 ENV USE_LIGHTRAG=true
-RUN --mount=type=ssh  \
-    --mount=type=cache,target=/root/.cache/pip  \
-    pip install aioboto3 nano-vectordb ollama xxhash "lightrag-hku<=0.0.8"
+RUN python -m pip install --user -e aioboto3 nano-vectordb ollama xxhash "lightrag-hku<=0.0.8"
+    
 
 # Install docling
-RUN --mount=type=ssh  \
-    --mount=type=cache,target=/root/.cache/pip  \
-    pip install "docling<=2.5.2"
+RUN python -m pip install --user -e "docling<=2.5.2"
 
 # Final stage
 FROM dependencies AS lite-final
