@@ -92,6 +92,18 @@ RUN if [ "$TARGETARCH" = "amd64" ]; then \
     python -m pip install --user "graphrag<=0.3.6" future; \
     fi
 
+# Graphrag fix
+RUN python -m pip uninstall --yes hnswlib chroma-hnswlib && \
+    python -m pip install --user chroma-hnswlib==0.7.1 && \
+    python -m pip install --user nano-graphrag && \
+    pip install git+https://github.com/HKUDS/LightRAG.git
+
+# Install lightRAG
+ENV USE_LIGHTRAG=true
+RUN --mount=type=ssh  \
+    --mount=type=cache,target=/root/.cache/pip  \
+    pip install aioboto3 nano-vectordb ollama xxhash "lightrag-hku<=0.0.8"
+
 # Final stage
 FROM dependencies AS lite-final
 
