@@ -13,6 +13,7 @@ def ensure_symlink():
     if not source.exists():
         print(f"Creating target directory: {source}")
         source.mkdir(parents=True, exist_ok=True)
+        chmod -R g+rwX /storage/ktem_app_data
 
     # Ensure the symlink exists and points correctly
     if symlink.is_symlink() and symlink.resolve() == source:
