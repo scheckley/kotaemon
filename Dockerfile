@@ -106,7 +106,6 @@ RUN python -m pip uninstall --yes hnswlib chroma-hnswlib && \
 ENV USE_LIGHTRAG=true
 RUN python -m pip install --user -e aioboto3 nano-vectordb ollama xxhash "lightrag-hku<=0.0.8"
     
-
 # Install docling
 RUN python -m pip install --user -e "docling<=2.5.2"
 
