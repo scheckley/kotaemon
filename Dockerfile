@@ -1,6 +1,5 @@
 # Lite version
-#FROM nvidia/cuda:12.4.0-base-ubuntu22.04 AS lite
-FROM python:3.10-slim as LITE
+FROM nvidia/cuda:12.4.0-base-ubuntu22.04 AS lite
 
 # Set up environment variables
 ENV PYTHONDONTWRITEBYTECODE=1 \
@@ -61,7 +60,6 @@ RUN mkdir -p /tmp/build/app/libs \
 
     chmod -R g+rwX /tmp/build /storage && \
     chown -R 1001:0 /tmp/build /storage
-
 
 FROM builder AS dependencies
 
