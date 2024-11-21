@@ -54,10 +54,9 @@ RUN mkdir -p /tmp/build/app/libs \
     /tmp/build/app/matplotlib \
     /tmp/build/app/fontconfig \
     /tmp/build/.local/bin \
-    /tmp/build/.cache/pip && \
+    /tmp/build/.cache/pip \
     /storage/ktem_app_data && \
     ln -s /storage/ktem_app_data /tmp/build/app/ktem_app_data && \
-
     chmod -R g+rwX /tmp/build /storage && \
     chown -R 1001:0 /tmp/build /storage
 
