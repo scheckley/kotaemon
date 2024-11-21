@@ -82,9 +82,15 @@ COPY --chown=1001:0 .env.example /tmp/build/app/.env
 #RUN mkdir -p /storage/ktem_app_data && \
 #    ln -sfn /storage/ktem_app_data /tmp/build/app/ktem_app_data
 
+# Install torch and torchvision for unstructured
+RUN --mount=type=ssh  \
+    --mount=type=cache,target=/root/.cache/pip  \
+    pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
+
 # Python package installations
 RUN python -m pip install --user -e "libs/kotaemon[adv]" && \
     python -m pip install --user -e "libs/ktem" && \
+    pip install unstructured[all-docs] && \
     python -m pip install --user "pdfservices-sdk@git+https://github.com/niallcm/pdfservices-python-sdk.git@bump-and-unfreeze-requirements"
 
 # Conditional installation based on architecture
@@ -95,14 +101,25 @@ RUN if [ "$TARGETARCH" = "amd64" ]; then \
 # Graphrag fix
 RUN python -m pip uninstall --yes hnswlib chroma-hnswlib && \
     python -m pip install --user chroma-hnswlib==0.7.1 && \
-    python -m pip install --user nano-graphrag && \
-    pip install git+https://github.com/HKUDS/LightRAG.git
+    python -m pip install --user nano-graphrag
+    #pip install git+https://github.com/HKUDS/LightRAG.git
 
 # Install lightRAG
 ENV USE_LIGHTRAG=true
 RUN --mount=type=ssh  \
     --mount=type=cache,target=/root/.cache/pip  \
     pip install aioboto3 nano-vectordb ollama xxhash "lightrag-hku<=0.0.8"
+
+# Install docling
+RUN --mount=type=ssh  \
+    --mount=type=cache,target=/root/.cache/pip  \
+    pip install "docling<=2.5.2"
+
+# Clean up
+RUN apt-get autoremove \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/* \
+    && rm -rf ~/.cache
 
 # Final stage
 FROM dependencies AS lite-final
