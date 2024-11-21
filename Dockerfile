@@ -56,6 +56,7 @@ RUN mkdir -p /tmp/build/app/libs \
     /tmp/build/.local/bin \
     /tmp/build/.cache/pip \
     /storage/ktem_app_data && \
+    ln -s /storage/ktem_app_data /tmp/build/app/ktem_app_data && \
     chmod -R g+rwX /tmp/build /storage && \
     chown -R 1001:0 /tmp/build /storage
 
@@ -77,8 +78,9 @@ COPY --chown=1001:0 . /tmp/build/app
 COPY --chown=1001:0 .env.example /tmp/build/app/.env
 
 # Ensure ktem_app_data symlink with minimal intervention
-RUN mkdir -p /storage/ktem_app_data && \
-    ln -sfn /storage/ktem_app_data /tmp/build/app/ktem_app_data
+# for now, this is pushed up to the above section and app.py checks it at run time.
+#RUN mkdir -p /storage/ktem_app_data && \
+#    ln -sfn /storage/ktem_app_data /tmp/build/app/ktem_app_data
 
 # Python package installations
 RUN python -m pip install --user -e "libs/kotaemon[adv]" && \
