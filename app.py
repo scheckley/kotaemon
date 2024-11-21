@@ -1,3 +1,4 @@
+import subprocess
 import os
 from pathlib import Path
 
@@ -13,7 +14,10 @@ def ensure_symlink():
     if not source.exists():
         print(f"Creating target directory: {source}")
         source.mkdir(parents=True, exist_ok=True)
-        chmod -R g+rwX /storage/ktem_app_data
+
+        subprocess.run(
+            ["chmod", "-R", "g+rwX", str("storage/ktem_app_data")], check=True
+            )
 
     # Ensure the symlink exists and points correctly
     if symlink.is_symlink() and symlink.resolve() == source:
