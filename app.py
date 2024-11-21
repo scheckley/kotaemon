@@ -1,5 +1,5 @@
 import os
-from pathlib import path
+from pathlib import Path
 
 # check the symlink to the pvc at run time
 # I need to fix these hard coded paths asap
