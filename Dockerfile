@@ -56,9 +56,10 @@ RUN mkdir -p /tmp/build/app/libs \
     /tmp/build/.local/bin \
     /tmp/build/.cache/pip \
     /storage/ktem_app_data && \
-    ln -s /storage/ktem_app_data /tmp/build/app/ktem_app_data && \
-    chmod -R g+rwX /tmp/build /storage && \
-    chown -R 1001:0 /tmp/build /storage
+    chmod -R 775 /tmp/build /storage && \
+    chgrp -R 0 /tmp/build /storage && \
+    chown -R g=u /tmp/build /storage && \
+    ln -s /storage/ktem_app_data /tmp/build/app/ktem_app_data
 
 FROM builder AS dependencies
 
