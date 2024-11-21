@@ -1,17 +1,20 @@
 import os
 from pathlib import Path
 
-# check the symlink to the pvc at run time
-# I need to fix these hard coded paths asap
 def ensure_symlink():
     source = Path("/storage/ktem_app_data")
     symlink = Path("/tmp/build/app/ktem_app_data")
 
-    # Check if the source directory exists
-    if not source.exists():
-        raise FileNotFoundError(f"Target directory {source} does not exist. Ensure the PVC is mounted correctly.")
+    # Ensure the PVC mount point exists and is writable
+    if not source.parent.exists():
+        raise FileNotFoundError(f"The parent directory {source.parent} does not exist. Is the PVC mounted correctly?")
 
-    # Create or fix the symlink
+    # Create the source directory if it doesn't exist
+    if not source.exists():
+        print(f"Creating target directory: {source}")
+        source.mkdir(parents=True, exist_ok=True)
+
+    # Ensure the symlink exists and points correctly
     if symlink.is_symlink() and symlink.resolve() == source:
         print(f"Symbolic link {symlink} already exists and is correct.")
     else:
@@ -22,6 +25,7 @@ def ensure_symlink():
 
 # Ensure the symlink before starting the app
 ensure_symlink()
+
 
 
 from theflow.settings import settings as flowsettings
