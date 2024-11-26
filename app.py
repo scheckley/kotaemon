@@ -3,31 +3,21 @@ import os
 from pathlib import Path
 
 def ensure_directory_permissions(directory: Path, mode: str = "g+rwX"):
-    """
-    Recursively ensure proper permissions on a directory and its contents.
-    
-    Args:
-        directory (Path): Directory to set permissions on
-        mode (str): chmod mode to apply
-    """
     try:
         # First ensure the directory exists
         directory.mkdir(parents=True, exist_ok=True)
         
-        # Apply permissions recursively
-        subprocess.run(
-            ["chmod", "-R", mode, str(directory)],
-            check=True,
-            capture_output=True
-        )
+        # Alternative: Use os module instead of subprocess
+        for root, dirs, files in os.walk(str(directory)):
+            for dir in dirs:
+                os.chmod(os.path.join(root, dir), 0o775)  # Equivalent to g+rwX
+            for file in files:
+                os.chmod(os.path.join(root, file), 0o664)  # Read/write for group
         
-        print(f"Successfully set permissions {mode} on {directory}")
-    except subprocess.CalledProcessError as e:
-        print(f"Failed to set permissions on {directory}: {e.stderr.decode()}")
-        raise
+        print(f"Successfully set permissions on {directory}")
     except Exception as e:
-        print(f"Unexpected error while setting permissions on {directory}: {e}")
-        raise
+        print(f"Permission setting error: {e}")
+        # Consider whether to raise or just log
 
 def ensure_symlink():
     source = Path("/storage/ktem_app_data")
