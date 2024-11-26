@@ -76,6 +76,7 @@ RUN bash /tmp/build/app/scripts/download_pdfjs.sh $PDFJS_PREBUILT_DIR
 # Copy application files
 COPY --chown=1001:0 . /tmp/build/app
 COPY --chown=1001:0 .env.example /tmp/build/app/.env
+COPY --chown=1001:0 scripts/fix-permissions.sh /usr/local/bin/fix-permissions.sh
 
 # Install Python packages
 RUN python -m pip install --user -e "libs/kotaemon[adv]" && \
