@@ -2,33 +2,35 @@ import subprocess
 import os
 from pathlib import Path
 
-def ensure_directory_permissions(directory: Path, mode: str = "775"):
+def ensure_directory_permissions(directory: Path, uid: int = 1001, gid: int = 0, mode: str = "775"):
     """
-    Recursively ensure proper permissions on a directory and its contents for OpenShift.
+    Recursively ensure proper permissions on a directory and its contents.
     
     Args:
         directory (Path): Directory to set permissions on
+        uid (int): User ID to set ownership to (default 1001)
+        gid (int): Group ID to set ownership to (default 0 for root group)
         mode (str): chmod mode to apply
     """
     try:
         # First ensure the directory exists
         directory.mkdir(parents=True, exist_ok=True)
         
-        # Change group ownership to root and apply group read/write/execute permissions
+        # Change ownership to specified user and group
         subprocess.run(
-            ["chgrp", "-R", "0", str(directory)],
+            ["chown", "-R", f"{uid}:{gid}", str(directory)],
             check=True,
             capture_output=True
         )
         
-        # Use numeric mode for broader compatibility
+        # Apply group read/write/execute permissions
         subprocess.run(
             ["chmod", "-R", mode, str(directory)],
             check=True,
             capture_output=True
         )
         
-        print(f"Successfully set permissions {mode} on {directory}")
+        print(f"Successfully set ownership to {uid}:{gid} and permissions {mode} on {directory}")
     except subprocess.CalledProcessError as e:
         print(f"Failed to set permissions on {directory}: {e.stderr.decode()}")
         raise
@@ -51,11 +53,12 @@ def ensure_symlink():
         source.mkdir(parents=True, exist_ok=True)
     
     # Set permissive group permissions on the main directory and its subdirectories
-    ensure_directory_permissions(source)
+    # Using 1001:0 ownership explicitly
+    ensure_directory_permissions(source, uid=1001, gid=0)
     
     # Specifically ensure gradio_tmp directory exists and has correct permissions
     gradio_tmp.mkdir(parents=True, exist_ok=True)
-    ensure_directory_permissions(gradio_tmp)
+    ensure_directory_permissions(gradio_tmp, uid=1001, gid=0)
 
     # Ensure the symlink exists and points correctly
     if symlink.is_symlink() and symlink.resolve() == source:
@@ -68,6 +71,8 @@ def ensure_symlink():
 
 # Ensure the symlink before starting the app
 ensure_symlink()
+
+
 
 
 
