@@ -2,22 +2,39 @@ import subprocess
 import os
 from pathlib import Path
 
-def ensure_directory_permissions(directory: Path, mode: str = "g+rwX"):
+def ensure_directory_permissions(directory: Path, mode: str = "775"):
+    """
+    Recursively ensure proper permissions on a directory and its contents for OpenShift.
+    
+    Args:
+        directory (Path): Directory to set permissions on
+        mode (str): chmod mode to apply
+    """
     try:
         # First ensure the directory exists
         directory.mkdir(parents=True, exist_ok=True)
         
-        # Alternative: Use os module instead of subprocess
-        for root, dirs, files in os.walk(str(directory)):
-            for dir in dirs:
-                os.chmod(os.path.join(root, dir), 0o775)  # Equivalent to g+rwX
-            for file in files:
-                os.chmod(os.path.join(root, file), 0o664)  # Read/write for group
+        # Change group ownership to root and apply group read/write/execute permissions
+        subprocess.run(
+            ["chgrp", "-R", "0", str(directory)],
+            check=True,
+            capture_output=True
+        )
         
-        print(f"Successfully set permissions on {directory}")
+        # Use numeric mode for broader compatibility
+        subprocess.run(
+            ["chmod", "-R", mode, str(directory)],
+            check=True,
+            capture_output=True
+        )
+        
+        print(f"Successfully set permissions {mode} on {directory}")
+    except subprocess.CalledProcessError as e:
+        print(f"Failed to set permissions on {directory}: {e.stderr.decode()}")
+        raise
     except Exception as e:
-        print(f"Permission setting error: {e}")
-        # Consider whether to raise or just log
+        print(f"Unexpected error while setting permissions on {directory}: {e}")
+        raise
 
 def ensure_symlink():
     source = Path("/storage/ktem_app_data")
@@ -31,10 +48,10 @@ def ensure_symlink():
     # Create and set permissions on the source directory if it doesn't exist
     if not source.exists():
         print(f"Creating target directory: {source}")
-        ensure_directory_permissions(source)
-    else:
-        # If it exists, ensure permissions are correct
-        ensure_directory_permissions(source)
+        source.mkdir(parents=True, exist_ok=True)
+    
+    # Set permissive group permissions on the main directory and its subdirectories
+    ensure_directory_permissions(source)
     
     # Specifically ensure gradio_tmp directory exists and has correct permissions
     gradio_tmp.mkdir(parents=True, exist_ok=True)
@@ -51,6 +68,8 @@ def ensure_symlink():
 
 # Ensure the symlink before starting the app
 ensure_symlink()
+
+
 
 from theflow.settings import settings as flowsettings
 
