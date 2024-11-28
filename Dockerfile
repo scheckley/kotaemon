@@ -133,4 +133,4 @@ RUN python -c "import nltk; nltk.download('punkt', download_dir='/tmp/build/app/
 RUN pip uninstall --yes hnswlib chroma-hnswlib && pip install chroma-hnswlib
 
 #CMD ["python", "app.py", "--host", "0.0.0.0", "--port", "7860"]
-CMD ["/bin/bash", "-c", "/app/scripts/fix-permissions.sh && python app.py --host 0.0.0.0 --port 7860"]
+CMD ["/bin/bash", "-c", "/tmp/build/app/scripts/fix-permissions.sh && python app.py --host 0.0.0.0 --port 7860"]
