@@ -1,6 +1,7 @@
 # Lite version
 FROM nvidia/cuda:12.4.0-base-ubuntu22.04 AS lite
 
+<<<<<<< HEAD
 # Set up environment variables
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
@@ -11,6 +12,20 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     XDG_CACHE_HOME="/tmp/build/app/fontconfig" \
     HOME="/tmp/build" \
     PATH="/tmp/build/.local/bin:$PATH"
+=======
+# Common dependencies
+RUN apt-get update -qqy && \
+    apt-get install -y --no-install-recommends \
+        ssh \
+        git \
+        gcc \
+        g++ \
+        poppler-utils \
+        libpoppler-dev \
+        unzip \
+        curl \
+        cargo
+>>>>>>> upstream/main
 
 # Set up ARGs
 ARG TARGETPLATFORM
@@ -99,7 +114,20 @@ CMD ["python", "app.py", "--host", "0.0.0.0", "--port", "7860"]
 # Full version
 FROM lite-final AS full
 
+<<<<<<< HEAD
 USER 1001:0
+=======
+# Additional dependencies for full version
+RUN apt-get update -qqy && \
+    apt-get install -y --no-install-recommends \
+        tesseract-ocr \
+        tesseract-ocr-jpn \
+        libsm6 \
+        libxext6 \
+        libreoffice \
+        ffmpeg \
+        libmagic-dev
+>>>>>>> upstream/main
 
 # Install torch and related packages
 RUN python -m pip install --user torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
@@ -130,7 +158,12 @@ RUN --mount=type=ssh  \
 
 RUN python -c "import nltk; nltk.download('punkt', download_dir='/tmp/build/app/nltk_data'); nltk.download('averaged_perceptron_tagger', download_dir='/tmp/build/app/nltk_data')"
 
+<<<<<<< HEAD
 RUN pip uninstall --yes hnswlib chroma-hnswlib && pip install chroma-hnswlib
+=======
+# Download nltk packages as required for unstructured
+# RUN python -c "from unstructured.nlp.tokenize import _download_nltk_packages_if_not_present; _download_nltk_packages_if_not_present()"
+>>>>>>> upstream/main
 
 #CMD ["python", "app.py", "--host", "0.0.0.0", "--port", "7860"]
 CMD ["/bin/bash", "-c", "/tmp/build/app/scripts/fix-permissions.sh && python app.py --host 0.0.0.0 --port 7860"]
