@@ -73,10 +73,17 @@ RUN python -m pip install --user --upgrade pip
 COPY --chown=1001:0 scripts/download_pdfjs.sh /tmp/build/app/scripts/download_pdfjs.sh
 RUN bash /tmp/build/app/scripts/download_pdfjs.sh $PDFJS_PREBUILT_DIR
 
+<<<<<<< HEAD
 # Copy application files
 COPY --chown=1001:0 . /tmp/build/app
 COPY --chown=1001:0 .env.example /tmp/build/app/.env
 COPY --chown=1001:0 ./scripts/fix-permissions.sh /tmp/build/app/scripts/fix-permissions.sh
+=======
+# Copy contents
+COPY . /app
+COPY launch.sh /app/launch.sh
+COPY .env.example /app/.env
+>>>>>>> upstream/main
 
 # Install Python packages
 RUN python -m pip install --user -e "libs/kotaemon[adv]" && \
@@ -91,10 +98,14 @@ RUN if [ "$TARGETARCH" = "amd64" ]; then \
 # Final stage
 FROM dependencies AS lite-final
 
+<<<<<<< HEAD
 USER 1001:0
 WORKDIR /tmp/build/app
 
 CMD ["python", "app.py", "--host", "0.0.0.0", "--port", "7860"]
+=======
+ENTRYPOINT ["sh", "/app/launch.sh"]
+>>>>>>> upstream/main
 
 # Full version
 FROM lite-final AS full
@@ -133,8 +144,25 @@ RUN python -c "import nltk; nltk.download('punkt', download_dir='/tmp/build/app/
 
 RUN pip uninstall --yes hnswlib chroma-hnswlib && pip install chroma-hnswlib
 
+<<<<<<< HEAD
 # Download nltk packages as required for unstructured
 #RUN python -c "from unstructured.nlp.tokenize import _download_nltk_packages_if_not_present; _download_nltk_packages_if_not_present()"
 
 #CMD ["python", "app.py", "--host", "0.0.0.0", "--port", "7860"]
 CMD ["/bin/bash", "-c", "/tmp/build/app/scripts/fix-permissions.sh && python app.py --host 0.0.0.0 --port 7860"]
+=======
+ENTRYPOINT ["sh", "/app/launch.sh"]
+
+# Ollama-bundled version
+FROM full AS ollama
+
+# Install ollama
+RUN --mount=type=ssh  \
+    --mount=type=cache,target=/root/.cache/pip  \
+    curl -fsSL https://ollama.com/install.sh | sh
+
+# RUN nohup bash -c "ollama serve &" && sleep 4 && ollama pull qwen2.5:7b
+RUN nohup bash -c "ollama serve &" && sleep 4 && ollama pull nomic-embed-text
+
+ENTRYPOINT ["sh", "/app/launch.sh"]
+>>>>>>> upstream/main

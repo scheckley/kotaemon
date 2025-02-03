@@ -78,7 +78,17 @@ ensure_gradio_temp_directory()
 from theflow.settings import settings as flowsettings
 
 KH_APP_DATA_DIR = getattr(flowsettings, "KH_APP_DATA_DIR", ".")
+<<<<<<< HEAD
 GRADIO_TEMP_DIR = os.getenv("GRADIO_TEMP_DIR")
+=======
+KH_GRADIO_SHARE = getattr(flowsettings, "KH_GRADIO_SHARE", False)
+GRADIO_TEMP_DIR = os.getenv("GRADIO_TEMP_DIR", None)
+# override GRADIO_TEMP_DIR if it's not set
+if GRADIO_TEMP_DIR is None:
+    GRADIO_TEMP_DIR = os.path.join(KH_APP_DATA_DIR, "gradio_tmp")
+    os.environ["GRADIO_TEMP_DIR"] = GRADIO_TEMP_DIR
+
+>>>>>>> upstream/main
 
 from ktem.main import App  # noqa
 
@@ -91,5 +101,9 @@ demo.queue().launch(
         "libs/ktem/ktem/assets",
         GRADIO_TEMP_DIR,
     ],
+<<<<<<< HEAD
     server_name="0.0.0.0",
+=======
+    share=KH_GRADIO_SHARE,
+>>>>>>> upstream/main
 )
