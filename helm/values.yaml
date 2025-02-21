@@ -6,7 +6,7 @@ image:
 replicaCount: 1
 
 storage:
-  size: 10Gi
+  size: 20Gi
   storageClassName: ""  # Use cluster default
 
 service:
@@ -16,11 +16,11 @@ service:
 
 resources:
   requests:
-    cpu: 500m
-    memory: 2Gi
+    cpu: 16
+    memory: 8Gi
   limits:
-    cpu: 1
-    memory: 4Gi
+    cpu: 32
+    memory: 32Gi
 
 route:
   enabled: true
