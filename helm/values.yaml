@@ -16,10 +16,10 @@ service:
 
 resources:
   requests:
-    cpu: 16
+    cpu: 8
     memory: 8Gi
   limits:
-    cpu: 32
+    cpu: 16
     memory: 32Gi
 
 route:
