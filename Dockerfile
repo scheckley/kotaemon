@@ -132,6 +132,7 @@ RUN python -c "import nltk; nltk.download('punkt', download_dir='/tmp/build/app/
 
 
 RUN pip uninstall --yes hnswlib chroma-hnswlib && pip install chroma-hnswlib
+RUN pip uninstall --yes python-multipart && pip install python-multipart==0.0.12
 
 # Download nltk packages as required for unstructured
 #RUN python -c "from unstructured.nlp.tokenize import _download_nltk_packages_if_not_present; _download_nltk_packages_if_not_present()"
