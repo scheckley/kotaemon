@@ -1,0 +1,58 @@
+# File: Chart.yaml
+apiVersion: v2
+name: kotaemon
+description: A Helm chart for Kotaemon deployment on OpenShift
+version: 0.1.0
+appVersion: "1.0.0"
+
+---
+# File: values.yaml
+# Default configuration values for the Helm chart
+image:
+  repository: your-registry/kotaemon
+  tag: latest
+  pullPolicy: IfNotPresent
+
+replicaCount: 1
+
+storage:
+  size: 10Gi
+  storageClassName: ""  # Use cluster default
+
+service:
+  port: 80
+  containerPort: 7860
+  targetPort: 7860
+
+resources:
+  requests:
+    cpu: 500m
+    memory: 2Gi
+  limits:
+    cpu: 1
+    memory: 4Gi
+
+route:
+  enabled: true
+  port: 80
+  tls:
+    enabled: true
+    termination: edge
+
+---
+# File: templates/pvc.yaml
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ .Release.Name }}-storage-pvc
+  labels:
+    {{- include "kotaemon.labels" . | nindent 4 }}
+spec:
+  accessModes:
+    - ReadWriteOnce
+  {{- if .Values.storage.storageClassName }}
+  storageClassName: {{ .Values.storage.storageClassName }}
+  {{- end }}
+  resources:
+    requests:
+      storage: {{ .Values.storage.size }}
