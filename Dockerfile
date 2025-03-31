@@ -128,8 +128,18 @@ RUN --mount=type=ssh  \
     --mount=type=cache,target=/root/.cache/pip  \
     pip install "docling<=2.5.2"
 
+
 RUN python -c "import nltk; nltk.download('punkt', download_dir='/tmp/build/app/nltk_data'); nltk.download('averaged_perceptron_tagger', download_dir='/tmp/build/app/nltk_data')"
 
+
+# Download NLTK data from LlamaIndex
+RUN python -c "from llama_index.core.readers.base import BaseReader"
+
+# Clean up
+RUN apt-get autoremove \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/* \
+    && rm -rf ~/.cache
 
 RUN pip uninstall --yes hnswlib chroma-hnswlib && pip install chroma-hnswlib
 
