@@ -1,5 +1,5 @@
 image:
-  repository: scheckley/kotaemon
+  repository: hartree.azurecr.io/stardust/kotaemon
   tag: latest
   pullPolicy: Always
 
