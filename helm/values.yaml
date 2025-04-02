@@ -3,6 +3,9 @@ image:
   tag: latest
   pullPolicy: Always
 
+imagePullSecrets:
+  - name: steve-kotaemon
+
 replicaCount: 1
 
 storage:
