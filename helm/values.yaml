@@ -4,7 +4,7 @@ image:
   pullPolicy: Always
 
 imagePullSecrets:
-  - name: steve-kotaemon
+  - name: kotaemon
 
 replicaCount: 1
 
