@@ -3,6 +3,7 @@ from collections import defaultdict
 from typing import Generator
 
 import numpy as np
+from decouple import config
 from theflow.settings import settings as flowsettings
 
 from kotaemon.base import (
@@ -32,7 +33,9 @@ except ImportError:
 
 MAX_IMAGES = 10
 CITATION_TIMEOUT = 5.0
-CONTEXT_RELEVANT_WARNING_SCORE = 0.7
+CONTEXT_RELEVANT_WARNING_SCORE = config(
+    "CONTEXT_RELEVANT_WARNING_SCORE", 0.3, cast=float
+)
 
 DEFAULT_QA_TEXT_PROMPT = (
     "Use the following pieces of context to answer the question at the end in detail with clear explanation. "  # noqa: E501
@@ -334,22 +337,31 @@ class AnswerWithContextPipeline(BaseComponent):
             highlight_text = ""
 
             ss = sorted(ss, key=lambda x: x["start"])
+            last_end = 0
             text = cur_doc.text[: ss[0]["start"]]
+
             for idx, span in enumerate(ss):
-                to_highlight = cur_doc.text[span["start"] : span["end"]]
-                if len(to_highlight) > len(highlight_text):
-                    highlight_text = to_highlight
+                # prevent overlapping between span
+                span_start = max(last_end, span["start"])
+                span_end = max(last_end, span["end"])
+
+                to_highlight = cur_doc.text[span_start:span_end]
+                last_end = span_end
+
+                # append to highlight on PDF viewer
+                highlight_text += (" " if highlight_text else "") + to_highlight
 
                 span_idx = span.get("idx", None)
                 if span_idx is not None:
-                    to_highlight = f"【{span_idx + 1}】" + to_highlight
+                    to_highlight = f"【{span_idx}】" + to_highlight
 
                 text += Render.highlight(
                     to_highlight,
-                    elem_id=str(span_idx + 1) if span_idx is not None else None,
+                    elem_id=str(span_idx) if span_idx is not None else None,
                 )
                 if idx < len(ss) - 1:
                     text += cur_doc.text[span["end"] : ss[idx + 1]["start"]]
+
             text += cur_doc.text[ss[-1]["end"] :]
             # add to display list
             with_citation.append(
@@ -376,7 +388,9 @@ class AnswerWithContextPipeline(BaseComponent):
             doc = id2docs[id_]
             doc_score = doc.metadata.get("llm_trulens_score", 0.0)
             is_open = not has_llm_score or (
-                doc_score > CONTEXT_RELEVANT_WARNING_SCORE and len(with_citation) == 0
+                doc_score
+                > CONTEXT_RELEVANT_WARNING_SCORE
+                # and len(with_citation) == 0
             )
             without_citation.append(
                 Document(

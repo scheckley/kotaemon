@@ -97,7 +97,7 @@ button.selected {
 #chat-info-panel {
   max-height: var(--main-area-height) !important;
   overflow: auto !important;
-  transition: all 0.5s;
+  transition: all 0.4s;
 }
 
 body.dark #chat-info-panel figure>img{
@@ -109,12 +109,12 @@ body.dark #chat-info-panel figure>img{
   flex-wrap: unset;
   overflow-y: scroll !important;
   position: sticky;
-  min-width: min(305px, 100%) !important;
   column-gap: 2px !important;
   scrollbar-width: none;
   /* Firefox */
   -ms-overflow-style: none;
   /* Internet Explorer 10+ */
+  transition: all 0.3s;
 }
 
 #conv-settings-panel::-webkit-scrollbar {
@@ -204,11 +204,42 @@ mark {
   right: 15px;
 }
 
+/* prevent overflow of html info panel */
+#html-info-panel {
+  overflow-x: auto !important;
+}
+
+#chat-expand-button {
+  position: absolute;
+  top: 6px;
+  right: -10px;
+  z-index: 1;
+}
+
+#save-setting-btn {
+  width: 150px;
+  height: 30px;
+  min-width: 100px !important;
+}
+
+#quick-setting-labels {
+  margin-top: 5px;
+  margin-bottom: -10px;
+}
+
 #use-mindmap-checkbox {
   position: absolute;
   width: 110px;
   top: 10px;
   right: 25px;
+}
+
+#citation-dropdown {
+  width: min(25%, 100px);
+  position: absolute;
+  top: 2px;
+  left: 120px;
+  height: 35px;
 }
 
 #quick-url textarea {
@@ -246,7 +277,6 @@ span.icon {
 }
 
 pdfjs-viewer-element {
-  height: 100vh;
   height: 100dvh;
 }
 
@@ -255,13 +285,12 @@ pdfjs-viewer-element {
 .modal {
   display: none;
   position: relative;
-  z-index: 1;
+  z-index: 2;
   left: 0;
   top: 0;
   width: 100%;
-  height: 100%;
-  overflow: auto;
-  background-color: rgb(0, 0, 0);
+  height: 85dvh;
+  overflow: hidden;
   background-color: rgba(0, 0, 0, 0.4);
 }
 
@@ -271,7 +300,7 @@ pdfjs-viewer-element {
 
 .modal-content {
   background-color: #fefefe;
-  height: 110%;
+  height: 100%;
   display: flex;
   flex-direction: column;
 }
@@ -292,12 +321,17 @@ pdfjs-viewer-element {
 
 .modal-body {
   flex: 1;
-  overflow: auto;
+  overflow: hidden;
 }
 
 /* Switch checkbox styles */
 
-#is-public-checkbox {
+/* #is-public-checkbox {
+  position: relative;
+  top: 4px;
+} */
+
+#suggest-chat-checkbox {
   position: relative;
   top: 4px;
 }
@@ -344,11 +378,11 @@ pdfjs-viewer-element {
 /* Bot animation */
 
 .message.bot {
-  animation: fadein 1.5s ease-in-out forwards;
+  animation: fadein 1.0s ease-in-out forwards;
 }
 
 details.evidence {
-  animation: fadein 0.5s ease-in-out forwards;
+  animation: fadein 0.3s ease-in-out forwards;
 }
 
 @keyframes fadein {
@@ -364,4 +398,61 @@ details.evidence {
 .message a.citation {
   color: #10b981;
   text-decoration: none;
+}
+
+/* pop-up for file tag in chat input*/
+.tribute-container ul {
+  background-color: var(--background-fill-primary) !important;
+  color: var(--body-text-color) !important;
+  font-family: var(--font);
+  font-size: var(--text-md);
+}
+
+.tribute-container li.highlight {
+  background-color: var(--border-color-primary) !important;
+}
+
+/* a fix for flickering background in Gradio DataFrame */
+tbody:not(.row_odd) {
+  background: var(--table-even-background-fill);
+}
+
+#chat-suggestion {
+  max-height: 350px;
+}
+
+#chat-suggestion table {
+  overflow: hidden;
+}
+
+#chat-suggestion table thead {
+  display: none;
+}
+
+#paper-suggestion table {
+  overflow: hidden;
+}
+
+svg.markmap {
+  width: 100%;
+  height: 100%;
+  font-family: Quicksand, sans-serif;
+  font-size: 15px;
+}
+
+div.markmap {
+  height: 400px;
+}
+
+#google-login {
+  max-width: 450px;
+}
+
+#user-api-key-wrapper {
+  max-width: 450px;
+}
+
+#login-row {
+  display: grid;
+  place-items: center;
 }

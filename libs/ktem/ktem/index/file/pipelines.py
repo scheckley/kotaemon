@@ -14,6 +14,7 @@ from pathlib import Path
 from typing import Generator, Optional, Sequence
 
 import tiktoken
+from decouple import config
 from ktem.db.models import engine
 from ktem.embeddings.manager import embedding_models_manager
 from ktem.llms.manager import llms
@@ -270,7 +271,7 @@ class DocumentRetrievalPipeline(BaseFileIndexRetriever):
             },
             "use_llm_reranking": {
                 "name": "Use LLM relevant scoring",
-                "value": True,
+                "value": not config("USE_LOW_LLM_REQUESTS", default=False, cast=bool),
                 "choices": [True, False],
                 "component": "checkbox",
             },
@@ -729,7 +730,11 @@ class IndexDocumentPipeline(BaseFileIndexIndexing):
 
         Can subclass this method for a more elaborate pipeline routing strategy.
         """
-        _, chunk_size, chunk_overlap = dev_settings()
+
+        _, dev_chunk_size, dev_chunk_overlap = dev_settings()
+
+        chunk_size = self.chunk_size or dev_chunk_size
+        chunk_overlap = self.chunk_overlap or dev_chunk_overlap
 
         # check if file_path is a URL
         if self.is_url(file_path):
@@ -744,12 +749,14 @@ class IndexDocumentPipeline(BaseFileIndexIndexing):
                     "the suitable pipeline for this file type in the settings."
                 )
 
+        print(f"Chunk size: {chunk_size}, chunk overlap: {chunk_overlap}")
+
         print("Using reader", reader)
         pipeline: IndexPipeline = IndexPipeline(
             loader=reader,
             splitter=TokenSplitter(
                 chunk_size=chunk_size or 1024,
-                chunk_overlap=chunk_overlap if chunk_overlap is not None else 256,
+                chunk_overlap=chunk_overlap or 256,
                 separator="\n\n",
                 backup_separators=["\n", ".", "\u200B"],
             ),
