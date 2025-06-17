@@ -116,7 +116,7 @@ RUN python -m pip uninstall --yes hnswlib chroma-hnswlib && \
 
 # Install lightRAG
 ENV USE_LIGHTRAG=true
-ENV USE_NANO_GRAPHRAG=true
+ENV USE_NANO_GRAPHRAG=false
 
 RUN python -m pip install --user aioboto3 nano-vectordb ollama xxhash lightrag-hku
 RUN --mount=type=ssh  \
