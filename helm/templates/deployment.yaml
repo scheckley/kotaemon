@@ -29,12 +29,12 @@ spec:
                   key: HF_TOKEN
           resources:
             requests:
-              cpu: {{ .Values.deployment.resources.requests.cpu }}
-              memory: {{ .Values.deployment.resources.requests.memory }}
+              cpu: {{ .Values.resources.requests.cpu }}
+              memory: {{ .Values.resources.requests.memory }}
             limits:
-              cpu: {{ .Values.deployment.resources.limits.cpu }}
-              memory: {{ .Values.deployment.resources.limits.memory }}
-              nvidia.com/gpu: {{ .Values.deployment.resources.gpu }}
+              cpu: {{ .Values.resources.limits.cpu }}
+              memory: {{ .Values.resources.limits.memory }}
+              nvidia.com/gpu: {{ .Values.resources.gpu }}
           volumeMounts:
             - name: storage-volume
               mountPath: /storage
