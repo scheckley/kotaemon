@@ -32,9 +32,9 @@ spec:
               cpu: {{ .Values.deployment.resources.requests.cpu }}
               memory: {{ .Values.deployment.resources.requests.memory }}
             limits:
-              cpu {{ .Values.deployment.resources.limits.cpu }}
-            memory: {{ .Values.deployment.resources.requets.memory }}
-            nvidia.com/gpu: {{ .Values.deployment.resources.gpu }}
+              cpu: {{ .Values.deployment.resources.limits.cpu }}
+              memory: {{ .Values.deployment.resources.requets.memory }}
+              nvidia.com/gpu: {{ .Values.deployment.resources.gpu }}
           volumeMounts:
             - name: storage-volume
               mountPath: /storage
