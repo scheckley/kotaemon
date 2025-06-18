@@ -10,7 +10,9 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     MPLCONFIGDIR="/tmp/build/app/matplotlib" \
     XDG_CACHE_HOME="/tmp/build/app/fontconfig" \
     HOME="/tmp/build" \
-    PATH="/tmp/build/.local/bin:$PATH"
+    PATH="/tmp/build/.local/bin:$PATH" \
+    NVIDIA_VISIBLE_DEVICES=all \
+    NVIDIA_DRIVER_CAPABILITIES=compute,utility
 
 # Set up ARGs
 ARG TARGETPLATFORM
@@ -101,7 +103,11 @@ FROM lite-final AS full
 
 # Install torch and related packages
 USER 1001:0
-RUN python -m pip install --user torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
+#RUN python -m pip install --user torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
+
+# Install PyTorch with CUDA support
+RUN python -m pip install --user torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
+
 
 # Install additional pip packages
 RUN python -m pip install --user -e "libs/kotaemon[adv]" && \
