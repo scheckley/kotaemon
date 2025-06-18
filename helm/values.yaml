@@ -18,13 +18,13 @@ service:
   targetPort: 7860
 
 resources:
-  gpu: 1
   requests:
     cpu: 8
     memory: 8Gi
   limits:
     cpu: 16
     memory: 32Gi
+  gpu: 1
 
 route:
   enabled: true
