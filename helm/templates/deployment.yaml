@@ -21,6 +21,12 @@ spec:
           ports:
             - name: http
               containerPort: {{ .Values.service.containerPort }}
+          env:
+            - name: HF_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: steve-hf-token
+                  key: HF_TOKEN
           volumeMounts:
             - name: storage-volume
               mountPath: /storage
