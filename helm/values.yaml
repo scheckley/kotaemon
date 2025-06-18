@@ -18,6 +18,7 @@ service:
   targetPort: 7860
 
 resources:
+  gpu: 1
   requests:
     cpu: 8
     memory: 8Gi
