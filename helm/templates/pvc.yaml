@@ -6,7 +6,7 @@ metadata:
     {{- include "kotaemon.labels" . | nindent 4 }}
 spec:
   accessModes:
-    - ReadWriteOnce
+    - ReadWriteMany
   {{- if .Values.storage.storageClassName }}
   storageClassName: {{ .Values.storage.storageClassName }}
   {{- end }}
