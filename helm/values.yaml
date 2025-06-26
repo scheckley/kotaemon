@@ -24,7 +24,6 @@ resources:
   limits:
     cpu: 16
     memory: 32Gi
-  gpu: 1
 
 route:
   enabled: true

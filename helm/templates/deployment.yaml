@@ -34,7 +34,6 @@ spec:
             limits:
               cpu: {{ .Values.resources.limits.cpu }}
               memory: {{ .Values.resources.limits.memory }}
-              nvidia.com/gpu: {{ .Values.resources.gpu }}
           volumeMounts:
             - name: storage-volume
               mountPath: /storage
