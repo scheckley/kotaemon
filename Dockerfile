@@ -1,5 +1,5 @@
 # Lite version
-FROM nvidia/cuda:12.4.0-base-ubuntu22.04 AS lite
+FROM nvidia/cuda:12.4.0-runtime-ubuntu22.04 AS lite
 
 # Set up environment variables
 ENV PYTHONDONTWRITEBYTECODE=1 \
